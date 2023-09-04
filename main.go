@@ -1,8 +1,8 @@
 package main
 
 import (
-	"flag"
 	"log"
+	"net"
 
 	"github.com/rjmp1991/people/pb"
 	"github.com/rjmp1991/people/service"
@@ -11,11 +11,17 @@ import (
 
 func main() {
 
-	port := flag.Int("port", 0, "the server port")
-	flag.Parse()
-	log.Printf("server started on port: %d", *port)
-	userServer := service.NewUserServer()
+	userServiceServer := service.NewUserServer()
+
 	grpcServer := grpc.NewServer()
-	pb.RegisterUserServiceServer(grpcServer, userServer)
+
+	lis, err := net.Listen("tcp", ":50051")
+	if err != nil {
+		log.Fatalf("failed to listen: %v", err)
+	}
+	pb.RegisterUserServiceServer(grpcServer, userServiceServer)
+	if err := grpcServer.Serve(lis); err != nil {
+		log.Fatalf("failed to serve: %v", err)
+	}
 
 }
