@@ -1,8 +1,8 @@
 syntax = "proto3";
 
-package people;
+package pb;
 
-option go_package = "github.com/rjmp1991/people";
+option go_package = "github.com/rjmp1991/pb";
 
 service UserService {
   rpc GetUser (UserRequest) returns (UserResponse) {}
