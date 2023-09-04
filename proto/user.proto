@@ -9,12 +9,12 @@ service UserService {
 }
 
 message User {
-  string user_id = 1;
+  int32 user_id = 1;
   string user_name = 2;
 }
 
 message UserRequest {
-  string user_id = 1;
+  int32 user_id = 1;
 }
 
 message UserResponse {
