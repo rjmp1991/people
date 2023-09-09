@@ -4,3 +4,5 @@ clean:
 	rm pb/*.go
 server:
 	go run main.go
+client:
+	go run ../client/main.go

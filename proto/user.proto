@@ -6,6 +6,9 @@ option go_package = "github.com/rjmp1991/pb";
 
 service UserService {
   rpc GetUser (UserRequest) returns (UserResponse) {}
+  rpc PutUser (User) returns (UserRequest) {}
+  rpc DelUser (UserRequest) returns (UserRequest) {}
+  rpc ListUsers (LimitRequest) returns (stream UserResponse) {}
 }
 
 message User {
@@ -13,10 +16,6 @@ message User {
   string user_name = 2;
 }
 
-message UserRequest {
-  int32 user_id = 1;
-}
-
-message UserResponse {
-  User user = 1;
-}
+message UserRequest { int32 user_id = 1; }
+message UserResponse { User user = 1; }
+message LimitRequest { int32 max_results = 1;}
