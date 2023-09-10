@@ -102,7 +102,9 @@ func (server *UserServiceServer) PutUsers(stream pb.UserService_PutUsersServer) 
 		if err != nil {
 			return logError(status.Errorf(codes.Unknown, "cannot receive stream request: %v", err))
 		}
-
+		if req.User == nil {
+			return logError(status.Errorf(codes.InvalidArgument, "invalid user body"))
+		}
 		if _, ok := server.Users[req.User.UserId]; ok {
 			return logError(status.Errorf(codes.AlreadyExists, "id: %v", req.User.UserId))
 		}
