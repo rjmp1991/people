@@ -24,8 +24,10 @@ const _ = grpc.SupportPackageIsVersion7
 type UserServiceClient interface {
 	GetUser(ctx context.Context, in *UserRequest, opts ...grpc.CallOption) (*UserResponse, error)
 	PutUser(ctx context.Context, in *User, opts ...grpc.CallOption) (*UserRequest, error)
+	UpdateUser(ctx context.Context, in *User, opts ...grpc.CallOption) (*UserRequest, error)
 	DelUser(ctx context.Context, in *UserRequest, opts ...grpc.CallOption) (*UserRequest, error)
 	ListUsers(ctx context.Context, in *LimitRequest, opts ...grpc.CallOption) (UserService_ListUsersClient, error)
+	PutUsers(ctx context.Context, opts ...grpc.CallOption) (UserService_PutUsersClient, error)
 }
 
 type userServiceClient struct {
@@ -48,6 +50,15 @@ func (c *userServiceClient) GetUser(ctx context.Context, in *UserRequest, opts .
 func (c *userServiceClient) PutUser(ctx context.Context, in *User, opts ...grpc.CallOption) (*UserRequest, error) {
 	out := new(UserRequest)
 	err := c.cc.Invoke(ctx, "/pb.UserService/PutUser", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *userServiceClient) UpdateUser(ctx context.Context, in *User, opts ...grpc.CallOption) (*UserRequest, error) {
+	out := new(UserRequest)
+	err := c.cc.Invoke(ctx, "/pb.UserService/UpdateUser", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -95,14 +106,47 @@ func (x *userServiceListUsersClient) Recv() (*UserResponse, error) {
 	return m, nil
 }
 
+func (c *userServiceClient) PutUsers(ctx context.Context, opts ...grpc.CallOption) (UserService_PutUsersClient, error) {
+	stream, err := c.cc.NewStream(ctx, &UserService_ServiceDesc.Streams[1], "/pb.UserService/PutUsers", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &userServicePutUsersClient{stream}
+	return x, nil
+}
+
+type UserService_PutUsersClient interface {
+	Send(*UserResponse) error
+	Recv() (*UserRequest, error)
+	grpc.ClientStream
+}
+
+type userServicePutUsersClient struct {
+	grpc.ClientStream
+}
+
+func (x *userServicePutUsersClient) Send(m *UserResponse) error {
+	return x.ClientStream.SendMsg(m)
+}
+
+func (x *userServicePutUsersClient) Recv() (*UserRequest, error) {
+	m := new(UserRequest)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
 // UserServiceServer is the server API for UserService service.
 // All implementations must embed UnimplementedUserServiceServer
 // for forward compatibility
 type UserServiceServer interface {
 	GetUser(context.Context, *UserRequest) (*UserResponse, error)
 	PutUser(context.Context, *User) (*UserRequest, error)
+	UpdateUser(context.Context, *User) (*UserRequest, error)
 	DelUser(context.Context, *UserRequest) (*UserRequest, error)
 	ListUsers(*LimitRequest, UserService_ListUsersServer) error
+	PutUsers(UserService_PutUsersServer) error
 	mustEmbedUnimplementedUserServiceServer()
 }
 
@@ -116,11 +160,17 @@ func (UnimplementedUserServiceServer) GetUser(context.Context, *UserRequest) (*U
 func (UnimplementedUserServiceServer) PutUser(context.Context, *User) (*UserRequest, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method PutUser not implemented")
 }
+func (UnimplementedUserServiceServer) UpdateUser(context.Context, *User) (*UserRequest, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateUser not implemented")
+}
 func (UnimplementedUserServiceServer) DelUser(context.Context, *UserRequest) (*UserRequest, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DelUser not implemented")
 }
 func (UnimplementedUserServiceServer) ListUsers(*LimitRequest, UserService_ListUsersServer) error {
 	return status.Errorf(codes.Unimplemented, "method ListUsers not implemented")
+}
+func (UnimplementedUserServiceServer) PutUsers(UserService_PutUsersServer) error {
+	return status.Errorf(codes.Unimplemented, "method PutUsers not implemented")
 }
 func (UnimplementedUserServiceServer) mustEmbedUnimplementedUserServiceServer() {}
 
@@ -171,6 +221,24 @@ func _UserService_PutUser_Handler(srv interface{}, ctx context.Context, dec func
 	return interceptor(ctx, in, info, handler)
 }
 
+func _UserService_UpdateUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(User)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserServiceServer).UpdateUser(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/pb.UserService/UpdateUser",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserServiceServer).UpdateUser(ctx, req.(*User))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _UserService_DelUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(UserRequest)
 	if err := dec(in); err != nil {
@@ -210,6 +278,32 @@ func (x *userServiceListUsersServer) Send(m *UserResponse) error {
 	return x.ServerStream.SendMsg(m)
 }
 
+func _UserService_PutUsers_Handler(srv interface{}, stream grpc.ServerStream) error {
+	return srv.(UserServiceServer).PutUsers(&userServicePutUsersServer{stream})
+}
+
+type UserService_PutUsersServer interface {
+	Send(*UserRequest) error
+	Recv() (*UserResponse, error)
+	grpc.ServerStream
+}
+
+type userServicePutUsersServer struct {
+	grpc.ServerStream
+}
+
+func (x *userServicePutUsersServer) Send(m *UserRequest) error {
+	return x.ServerStream.SendMsg(m)
+}
+
+func (x *userServicePutUsersServer) Recv() (*UserResponse, error) {
+	m := new(UserResponse)
+	if err := x.ServerStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
 // UserService_ServiceDesc is the grpc.ServiceDesc for UserService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -226,6 +320,10 @@ var UserService_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _UserService_PutUser_Handler,
 		},
 		{
+			MethodName: "UpdateUser",
+			Handler:    _UserService_UpdateUser_Handler,
+		},
+		{
 			MethodName: "DelUser",
 			Handler:    _UserService_DelUser_Handler,
 		},
@@ -235,6 +333,12 @@ var UserService_ServiceDesc = grpc.ServiceDesc{
 			StreamName:    "ListUsers",
 			Handler:       _UserService_ListUsers_Handler,
 			ServerStreams: true,
+		},
+		{
+			StreamName:    "PutUsers",
+			Handler:       _UserService_PutUsers_Handler,
+			ServerStreams: true,
+			ClientStreams: true,
 		},
 	},
 	Metadata: "user.proto",

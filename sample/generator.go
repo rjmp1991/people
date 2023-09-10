@@ -7,7 +7,7 @@ import (
 )
 
 func randomId() int32 {
-	return int32(rand.Intn(10))
+	return int32(rand.Intn(10)) + 1
 }
 
 func randomStringFromSet(a ...string) string {

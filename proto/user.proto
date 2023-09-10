@@ -7,8 +7,10 @@ option go_package = "github.com/rjmp1991/pb";
 service UserService {
   rpc GetUser (UserRequest) returns (UserResponse) {}
   rpc PutUser (User) returns (UserRequest) {}
+  rpc UpdateUser (User) returns (UserRequest) {}
   rpc DelUser (UserRequest) returns (UserRequest) {}
   rpc ListUsers (LimitRequest) returns (stream UserResponse) {}
+  rpc PutUsers (stream UserResponse) returns (stream UserRequest) {}
 }
 
 message User {
